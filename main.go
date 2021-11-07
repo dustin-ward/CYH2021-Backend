@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/dustin-ward/CYH2021-Backend/data"
-	"github.com/dustin-ward/CYH2021-Backend/routes"
 	"github.com/gorilla/mux"
 )
 
@@ -20,8 +19,8 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", greet)
-	r.HandleFunc("/users", routes.GetAllUsers)
-	r.HandleFunc("/users/{id}", routes.GetUser)
+	r.HandleFunc("/users", data.GetAllUsers)
+	r.HandleFunc("/users/{id}", data.GetUser)
 	fmt.Println("Now serving on 8080...")
 	http.ListenAndServe(":8080", r)
 }

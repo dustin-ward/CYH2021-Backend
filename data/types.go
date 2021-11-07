@@ -1,8 +1,8 @@
 package data
 
 type User struct {
-	id       uint32
-	email    string
-	username string
-	password string
+	Id       uint32 `json:"Id"`
+	Email    string `json:"Email"`
+	Username string `json:"Username"`
+	Password string `json:"Password"`
 }
