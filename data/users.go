@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -46,16 +47,62 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var u User
-	u.Email = r.FormValue("email")
-	u.Username = r.FormValue("username")
-	u.Password = r.FormValue("password")
-	hash, err := util.HashPassword(u.Password)
+	fmt.Println("Endpoint Hit: /register")
+
+	// Check for email in database
+	email := r.FormValue("email")
+	row := db.QueryRow("SELECT COUNT(*) FROM users WHERE email=?", email)
+
+	var count int
+	err = row.Scan(&count)
+	if count > 0 {
+		util.RespondWithError(w, http.StatusConflict, "email already exists")
+		return
+	}
+
+	// Gather account details and hash password
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+	hash, err := util.HashPassword(password)
 	util.ErrHandle(err)
-	u.Password = hash
+	password = hash
 
-	// SQL Query
+	// Insert new account into database
+	_, err = db.Exec("INSERT INTO users (email, username, password) VALUES (?, ?, ?)", email, username, password)
+	if err != nil {
+		util.RespondWithError(w, http.StatusBadRequest, "unable to create new user")
+	}
 
-	fmt.Println(u)
-	util.RespondWithJSON(w, http.StatusOK, map[string]string{"status": "Account successfully created!"})
+	fmt.Println("New user created:", email, username)
+	util.RespondWithJSON(w, http.StatusCreated, map[string]string{"status": "Account successfully created!"})
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: /login")
+	email := r.FormValue("email")
+	row := db.QueryRow("SELECT * FROM users WHERE email=?", email)
+
+	// Check to see if user exists
+	var u User
+	err = row.Scan(&u.Id, &u.Email, &u.Username, &u.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			util.RespondWithError(w, http.StatusNotFound, "no matching email exists")
+			return
+		} else {
+			util.RespondWithError(w, http.StatusInternalServerError, "error finding account")
+			return
+		}
+	}
+
+	// Check Password
+	password := r.FormValue("password")
+	if !util.CheckPasswordHash(password, u.Password) {
+		util.RespondWithError(w, http.StatusForbidden, "incorrect password")
+		return
+	}
+
+	// Respond
+	util.RespondWithJSON(w, http.StatusAccepted, map[string]string{"status": "login successful"})
+	fmt.Println("User logged in:", u.Id, u.Email, u.Username)
 }
