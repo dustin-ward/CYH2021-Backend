@@ -8,14 +8,14 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var db *sql.DB
+var DB *sql.DB
 var err error
 
 func Setup() {
-	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@%s/%s?parseTime=true", username, password, host, dbname))
+	DB, err = sql.Open("mysql", fmt.Sprintf("%s:%s@%s/%s?parseTime=true", username, password, host, dbname))
 	util.ErrHandle(err)
 }
 
 func Takedown() {
-	db.Close()
+	DB.Close()
 }
