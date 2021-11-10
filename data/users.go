@@ -9,13 +9,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type User struct {
-	Id       uint32 `json:"Id"`
-	Email    string `json:"Email"`
-	Username string `json:"Username"`
-	Password string `json:"Password"`
-}
-
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: /users")
 
