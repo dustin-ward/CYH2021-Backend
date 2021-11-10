@@ -26,11 +26,16 @@ func main() {
 	// Setup routes
 	r := mux.NewRouter()
 	r.HandleFunc("/", greet)
-	r.HandleFunc("/users", data.GetAllUsers).Methods("GET")
-	r.HandleFunc("/users/{id}", data.GetUser).Methods("GET")
 	r.HandleFunc("/register", auth.CreateUser).Methods("POST")
 	r.HandleFunc("/login", auth.Login).Methods("POST")
-	r.HandleFunc("/logout", auth.Logout)
+
+	// Routes with Auth middleware
+	authRoute := r.Methods("GET").Subrouter()
+	authRoute.HandleFunc("/users", data.GetAllUsers).Methods("GET")
+	authRoute.HandleFunc("/users/{id}", data.GetUser).Methods("GET")
+	authRoute.HandleFunc("/logout", auth.Logout)
+	authRoute.Use(auth.AuthMiddleware)
+
 	fmt.Println("Now serving on 8080...")
 
 	corsWrapper := cors.New(cors.Options{

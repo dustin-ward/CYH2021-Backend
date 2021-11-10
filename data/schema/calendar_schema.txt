@@ -1,0 +1,30 @@
+CREATE TABLE calendar (
+    id              int     UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id         int     UNSIGNED NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE day (
+    id              int     UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    calendar_id     int     UNSIGNED NOT NULL,
+    calendar_date   date    NOT NULL,
+    value           float,
+    FOREIGN KEY (calendar_id) REFERENCES calendar(id)
+);
+
+CREATE TABLE tasks (
+    id              int     UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    day_id          text    NOT NULL,
+    title           text    NOT NULL,
+    description     text,
+    task_time       time,
+    FOREIGN KEY (day_id) REFERENCES day(id)
+);
+
+CREATE TABLE moods (
+    id              int     UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    day_id          int     UNSIGNED NOT NULL,
+    mood            text    NOT NULL,
+    value           float   NOT NULL,
+    FOREIGN KEY (day_id) REFERENCES day(id)
+);

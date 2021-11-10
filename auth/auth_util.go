@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/dustin-ward/CYH2021-Backend/util"
 	"github.com/twinj/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -176,4 +177,27 @@ func FetchAuth(authD *AccessDetails) (uint32, error) {
 		return 0, fmt.Errorf("no matching token")
 	}
 	return token.Id, nil
+}
+
+// Middleware function to authorize token
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := TokenValid(r); err != nil {
+			util.RespondWithError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		} else {
+			ad, err := ExtractTokenMetadata(r)
+			if err != nil {
+				util.RespondWithError(w, http.StatusInternalServerError, "unable to extract token metadata")
+				return
+			}
+			id, err := FetchAuth(ad)
+			if err != nil || id == 0 {
+				util.RespondWithError(w, http.StatusUnauthorized, "unauthorized")
+				return
+			}
+			fmt.Printf("Authenticated user id: %d\n", ad.UserId)
+			next.ServeHTTP(w, r)
+		}
+	})
 }
