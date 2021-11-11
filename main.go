@@ -7,6 +7,7 @@ import (
 
 	"github.com/dustin-ward/CYH2021-Backend/auth"
 	"github.com/dustin-ward/CYH2021-Backend/data"
+	"github.com/dustin-ward/CYH2021-Backend/routes"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
@@ -26,14 +27,14 @@ func main() {
 	// Setup routes
 	r := mux.NewRouter()
 	r.HandleFunc("/", greet)
-	r.HandleFunc("/register", auth.CreateUser).Methods("POST")
-	r.HandleFunc("/login", auth.Login).Methods("POST")
+	r.HandleFunc("/register", routes.CreateUser).Methods("POST")
+	r.HandleFunc("/login", routes.Login).Methods("POST")
 
 	// Routes with Auth middleware
 	authRoute := r.Methods("GET").Subrouter()
-	authRoute.HandleFunc("/users", data.GetAllUsers).Methods("GET")
-	authRoute.HandleFunc("/users/{id}", data.GetUser).Methods("GET")
-	authRoute.HandleFunc("/logout", auth.Logout)
+	authRoute.HandleFunc("/users", routes.GetAllUsers).Methods("GET")
+	authRoute.HandleFunc("/users/{id}", routes.GetUser).Methods("GET")
+	authRoute.HandleFunc("/logout", routes.Logout)
 	authRoute.Use(auth.AuthMiddleware)
 
 	fmt.Println("Now serving on 8080...")

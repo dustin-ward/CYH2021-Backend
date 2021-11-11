@@ -1,10 +1,11 @@
-package data
+package routes
 
 import (
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/dustin-ward/CYH2021-Backend/data"
 	"github.com/dustin-ward/CYH2021-Backend/util"
 	"github.com/gorilla/mux"
 )
@@ -12,14 +13,14 @@ import (
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: /users")
 
-	rows, err := DB.Query("SELECT * FROM users")
+	rows, err := data.DB.Query("SELECT * FROM users")
 	util.ErrHandle(err)
 	defer rows.Close()
 
-	uList := make([]User, 0)
+	uList := make([]data.User, 0)
 	for rows.Next() {
-		var u User
-		err := rows.Scan(&u.Id, &u.Email, &u.Username, &u.Password)
+		var u data.User
+		err := rows.Scan(&u.ID, &u.Email, &u.Username, &u.Password)
 		util.ErrHandle(err)
 		uList = append(uList, u)
 	}
@@ -33,13 +34,13 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	util.ErrHandle(err)
 	fmt.Println("Endpoint Hit: /users/" + vars["id"])
 
-	rows, err := DB.Query("SELECT * FROM users WHERE id=?", id)
+	rows, err := data.DB.Query("SELECT * FROM users WHERE id=?", id)
 	util.ErrHandle(err)
 	defer rows.Close()
 
-	var u User
+	var u data.User
 	for rows.Next() {
-		err := rows.Scan(&u.Id, &u.Email, &u.Username, &u.Password)
+		err := rows.Scan(&u.ID, &u.Email, &u.Username, &u.Password)
 		util.ErrHandle(err)
 	}
 	util.RespondWithJSON(w, http.StatusOK, u)

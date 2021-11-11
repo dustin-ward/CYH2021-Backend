@@ -31,6 +31,8 @@ func CheckPasswordHash(password, hash string) bool {
  * TOKEN MEMORY MANAGEMENT
  */
 
+var ActiveTokens map[string]ActiveToken = make(map[string]ActiveToken)
+
 // Look for tokens that have expired and remove from map
 func CleanTokens() {
 	for {
@@ -140,7 +142,7 @@ func TokenValid(r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
+	if !token.Valid {
 		return err
 	}
 	return nil

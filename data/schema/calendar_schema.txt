@@ -1,24 +1,24 @@
-CREATE TABLE calendar (
+CREATE TABLE calendars (
     id              int     UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id         int     UNSIGNED NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE day (
+CREATE TABLE days (
     id              int     UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     calendar_id     int     UNSIGNED NOT NULL,
     calendar_date   date    NOT NULL,
     value           float,
-    FOREIGN KEY (calendar_id) REFERENCES calendar(id)
+    FOREIGN KEY (calendar_id) REFERENCES calendars(id)
 );
 
 CREATE TABLE tasks (
     id              int     UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    day_id          text    NOT NULL,
+    day_id          int     UNSIGNED NOT NULL,
     title           text    NOT NULL,
     description     text,
-    task_time       time,
-    FOREIGN KEY (day_id) REFERENCES day(id)
+    task_time       float,
+    FOREIGN KEY (day_id) REFERENCES days(id)
 );
 
 CREATE TABLE moods (
@@ -26,5 +26,5 @@ CREATE TABLE moods (
     day_id          int     UNSIGNED NOT NULL,
     mood            text    NOT NULL,
     value           float   NOT NULL,
-    FOREIGN KEY (day_id) REFERENCES day(id)
+    FOREIGN KEY (day_id) REFERENCES days(id)
 );
