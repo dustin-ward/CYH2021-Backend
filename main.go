@@ -31,9 +31,11 @@ func main() {
 	r.HandleFunc("/login", routes.Login).Methods("POST")
 
 	// Routes with Auth middleware
-	authRoute := r.Methods("GET").Subrouter()
+	authRoute := r.Methods("GET", "POST").Subrouter()
 	authRoute.HandleFunc("/users", routes.GetAllUsers).Methods("GET")
 	authRoute.HandleFunc("/users/{id}", routes.GetUser).Methods("GET")
+	authRoute.HandleFunc("/days", routes.GetDays).Methods("GET")
+	authRoute.HandleFunc("/days", routes.CreateDay).Methods("POST")
 	authRoute.HandleFunc("/logout", routes.Logout)
 	authRoute.Use(auth.AuthMiddleware)
 

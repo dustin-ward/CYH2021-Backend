@@ -63,6 +63,7 @@ func DeleteAuth(uuid string) (uint32, error) {
 		return 0, fmt.Errorf("unable to find uuid in active tokens")
 	}
 	delete(ActiveTokens, uuid)
+	fmt.Println("invalidating id", v.Id)
 	return v.Id, nil
 }
 

@@ -55,13 +55,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		util.RespondWithError(w, http.StatusInternalServerError, "unable to create calendar for user")
 	}
 
-	uJson, _ := json.Marshal(u)
-	cJson, _ := json.Marshal(calendar)
-	util.RespondWithJSON(w, http.StatusCreated, map[string]string{
-		"status":   "account successfully created",
-		"user":     string(uJson),
-		"calendar": string(cJson),
-	})
+	resp := data.RegisterResponse{
+		Status:      "account successfully created",
+		UserObj:     u,
+		CalendarObj: calendar,
+	}
+	util.RespondWithJSON(w, http.StatusCreated, resp)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
