@@ -186,6 +186,12 @@ func FetchAuth(authD *AccessDetails) (uint32, error) {
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := TokenValid(r); err != nil {
+			ad, err := ExtractTokenMetadata(r)
+			if err == nil {
+				fmt.Println("Unauthoried reqest", ad)
+			} else {
+				fmt.Println("Unauthoried reqest with unreadable token")
+			}
 			util.RespondWithError(w, http.StatusUnauthorized, "unauthorized")
 			return
 		} else {
