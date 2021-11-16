@@ -35,8 +35,8 @@ func GetDayHelper(id uint32) (data.DayResponse, error) {
 	// Get data directly associated with day
 	row := data.DB.QueryRow("SELECT * FROM days WHERE id=?", id)
 
-	var d data.Day
-	if err := row.Scan(&d.ID, &d.Calendar_ID, &d.Calendar_Date, &d.Value); err != nil {
+	// var d data.Day
+	if err := row.Scan(&dr.DayObj.ID, &dr.DayObj.Calendar_ID, &dr.DayObj.Calendar_Date, &dr.DayObj.Value); err != nil {
 		return dr, err
 	}
 
@@ -46,14 +46,17 @@ func GetDayHelper(id uint32) (data.DayResponse, error) {
 		return dr, err
 	}
 
+	sum := 0.0
 	for rows.Next() {
 		var m data.Mood
 		if err := rows.Scan(&m.ID, &m.Day_ID, &m.Mood, &m.Value); err != nil {
 			return dr, err
 		}
 
+		sum += m.Value
 		dr.Moods = append(dr.Moods, m)
 	}
+	dr.DayObj.Value = sum
 	rows.Close()
 
 	// Get all tasks associated with day
@@ -266,7 +269,9 @@ func GetDays(w http.ResponseWriter, r *http.Request) {
 			util.RespondWithError(w, http.StatusInternalServerError, "unable to retreive days")
 			return
 		}
-		dr.DayObj = d
+		dr.DayObj.ID = d.ID
+		dr.DayObj.Calendar_ID = d.Calendar_ID
+		dr.DayObj.Calendar_Date = d.Calendar_Date
 
 		Response.Days = append(Response.Days, dr)
 	}

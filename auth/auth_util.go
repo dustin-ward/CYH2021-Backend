@@ -186,11 +186,11 @@ func FetchAuth(authD *AccessDetails) (uint32, error) {
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := TokenValid(r); err != nil {
-			ad, err := ExtractTokenMetadata(r)
-			if err == nil {
-				fmt.Println("Unauthoried reqest", ad)
+			ad, err2 := ExtractTokenMetadata(r)
+			if err2 == nil {
+				fmt.Println("Unauthorized reqest", ad, err.Error())
 			} else {
-				fmt.Println("Unauthoried reqest with unreadable token")
+				fmt.Println("Unauthorized reqest with unreadable token", r.Header.Get("Authorization"), err.Error(), err2.Error())
 			}
 			util.RespondWithError(w, http.StatusUnauthorized, "unauthorized")
 			return
@@ -202,6 +202,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			}
 			id, err := FetchAuth(ad)
 			if err != nil || id == 0 {
+				fmt.Println("Unauthorized request with outdated token", r.Header.Get("Authorization"))
 				util.RespondWithError(w, http.StatusUnauthorized, "unauthorized")
 				return
 			}
