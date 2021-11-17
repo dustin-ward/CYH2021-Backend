@@ -80,6 +80,7 @@ func GetDayHelper(id uint32) (data.DayResponse, error) {
 
 func UpdateMoods(new, old *[]data.Mood) (float64, error) {
 	// Set of new elements
+	fmt.Println("NEW:", new, "OLD:", old)
 	s := make(map[string]struct{}, len(*new))
 	for _, x := range *new {
 		s[x.Mood] = struct{}{}
@@ -89,7 +90,7 @@ func UpdateMoods(new, old *[]data.Mood) (float64, error) {
 	for _, x := range *old {
 		if _, found := s[x.Mood]; !found {
 			// Delete mood
-			if _, err := data.DB.Exec("DELETE FROM moods WHERE id=?", x.ID); err != nil {
+			if _, err := data.DB.Exec("DELETE FROM moods WHERE day_id=? AND mood=?", x.Day_ID, x.Mood); err != nil {
 				return 0.0, err
 			}
 		}
@@ -99,8 +100,9 @@ func UpdateMoods(new, old *[]data.Mood) (float64, error) {
 	sum := 0.0
 	for _, x := range *new {
 		// Insert day into table (or update)
-		res, err := data.DB.Exec("INSERT INTO moods (day_id, mood, value) VALUES (?,?,?) ON DUPLICATE KEY UPDATE mood=?, value=?", x.Day_ID, x.Mood, x.Value, x.Mood, x.Value)
+		res, err := data.DB.Exec("INSERT IGNORE INTO moods (day_id, mood, value) VALUES (?,?,?)", x.Day_ID, x.Mood, x.Value)
 		if err != nil {
+			fmt.Println("ERR2")
 			return 0.0, err
 		}
 		last_id, _ := res.LastInsertId()
@@ -108,6 +110,7 @@ func UpdateMoods(new, old *[]data.Mood) (float64, error) {
 		sum += x.Value
 	}
 
+	fmt.Println("NEW(AFTER):", new)
 	return sum, nil
 }
 
@@ -144,6 +147,7 @@ func UpdateTasks(new, old *[]data.Task) error {
 
 func CreateDay(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint hit: /days POST")
+	fmt.Println(r.Body)
 
 	// Read request body
 	var d data.DayResponse
@@ -177,8 +181,10 @@ func CreateDay(w http.ResponseWriter, r *http.Request) {
 	var OrigDayRes data.DayResponse
 	if d.DayObj.ID == 0 {
 		// Insert day into table (or update)
-		res, err := data.DB.Exec("INSERT INTO days (calendar_id, calendar_date, value) VALUES (?,?,?)", c.ID, d.DayObj.Calendar_Date, 0.0)
+		fmt.Println("Creating new day", d.DayObj.Calendar_Date[0:10])
+		res, err := data.DB.Exec("INSERT INTO days (calendar_id, calendar_date, value) VALUES (?,?,?)", c.ID, d.DayObj.Calendar_Date[0:10], 0.0)
 		if err != nil {
+			fmt.Println(err.Error())
 			util.RespondWithError(w, http.StatusBadRequest, "invalid fields")
 			return
 		}
@@ -222,6 +228,7 @@ func CreateDay(w http.ResponseWriter, r *http.Request) {
 
 func GetDays(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint hit: /days GET")
+	fmt.Println(r.Body)
 
 	// Get token metadata
 	ad, err := auth.ExtractTokenMetadata(r)

@@ -22,9 +22,10 @@ CREATE TABLE tasks (
 );
 
 CREATE TABLE moods (
-    id              int     UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    day_id          int     UNSIGNED NOT NULL,
-    mood            text    NOT NULL,
-    value           float   NOT NULL,
+    id              int             UNSIGNED AUTO_INCREMENT UNIQUE,
+    day_id          int             UNSIGNED NOT NULL,
+    mood            varchar(255)    NOT NULL,
+    value           float           NOT NULL,
+    PRIMARY KEY (day_id, mood),
     FOREIGN KEY (day_id) REFERENCES days(id)
 );
